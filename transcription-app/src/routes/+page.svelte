@@ -3,16 +3,11 @@
 	import { v4 } from 'uuid';
 	import { env } from '$env/dynamic/public';
 
-	let audioChunks = []; // Store audio data chunks
-	let mediaRecorder = null;
-	// let recording = false
 	let uid = null;
-	// let intervalTimer = null;
-	let audioElement = null;
 	let socket;
 	let transcript;
-
-	$: console.log('Transcript: ', transcript);
+  let stream;
+  let audioDataCache = [];
 	/**
 	 * Resamples the audio data to a target sample rate of 16kHz.
 	 * @param {Array|ArrayBuffer|TypedArray} audioData - The input audio data.
@@ -48,19 +43,12 @@
 	}
 
 	async function startRecording() {
-		const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); // audio stream
-		// const origSampleRate = stream.getAudioTracks()[0].getSettings().sampleRate;
-		// const audioChannelCount = stream.getAudioTracks()[0].getSettings().channelCount;
-		// console.log('Audio channel count: ', audioChannelCount)
-		// console.log('Sample rate: ', origSampleRate)
-
-		// mediaRecorder = new MediaRecorder(stream);
-		// mediaRecorder.start(10000) // fire the dataavailable event every 1s
+    transcript = null;
+		stream = await navigator.mediaDevices.getUserMedia({ audio: true }); // audio stream
 
 		uid = v4(); // generate a unique id for this recording
 
 		if (stream) {
-			// console.log('Media recorder', mediaRecorder)
 			socket = new WebSocket(env.PUBLIC_WEBSOCKET_URL); // create a websocket connection
 			let isServerReady = false;
 
@@ -96,7 +84,6 @@
 				transcript = JSON.parse(event.data);
 			};
 
-			const audioDataCache = [];
 			const context = new AudioContext();
 			const mediaStream = context.createMediaStreamSource(stream);
 			const recorder = context.createScriptProcessor(4096, 1, 1);
@@ -107,34 +94,51 @@
 				const audioData16kHz = resampleTo16kHZ(inputData, context.sampleRate);
 
 				audioDataCache.push(inputData);
-
 				socket.send(audioData16kHz);
 			};
 
 			mediaStream.connect(recorder);
 			recorder.connect(context.destination);
-			
-      
-		} else {
+
+
+		}
+    else {
 			if (socket) {
 				socket.close();
-				audioChunks = [];
+				audioDataCache = [];
 			}
 			return;
 		}
 	}
 
-	function stopRecording() {}
+
+  function stopRecording() {
+    if (stream) {
+      // Stop the audio stream tracks
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+
+      // Close the WebSocket connection if it's open
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close();
+      }
+
+      // Clear any audio data cache or other cleanup actions
+      audioDataCache = [];
+      
+    }
+  }
 
 	onMount(() => {
 		audioElement = document.querySelector('audio');
 	});
+
 </script>
 
 <div>
 	<button on:click={startRecording}>Start</button>
 	<button on:click={stopRecording}>Stop</button>
-	<audio controls />
+	<!-- <audio controls /> -->
 	<div class="transcript">
 		{#if transcript}
 			{#each transcript.segments as segment}

@@ -44,4 +44,6 @@ COPY whisper_live /app/whisper_live
 
 COPY run_server.py /app
 
+EXPOSE 9090
+
 CMD ["python", "run_server.py"]
