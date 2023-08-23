@@ -11,6 +11,7 @@
   let searchQuery = '';
   let recording = false;
   let transcriptDiv;
+  let timestamp;
 
   const scrollToBottom = async (node) => {
 		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
@@ -58,12 +59,13 @@
 
 	async function startRecording() {
     transcript = null;
-    recording = true;
 		stream = await navigator.mediaDevices.getUserMedia({ audio: true }); // audio stream
 
 		uid = v4(); // generate a unique id for this recording
 
 		if (stream) {
+      recording = true;
+      timestamp = new Date();
 			socket = new WebSocket(env.PUBLIC_WEBSOCKET_URL); // create a websocket connection
 			let isServerReady = false;
 
@@ -179,6 +181,17 @@
     // Clean up by revoking the object URL
     URL.revokeObjectURL(url);
   }
+
+  /**
+   * Converts seconds to a timestamp string
+   * @param seconds
+   */
+  function timestampFromSeconds(seconds) {
+    const newTimestamp = new Date(timestamp); // Create a new Date object with the same value as the original timestamp
+    newTimestamp.setSeconds(newTimestamp.getSeconds() + seconds);
+    const formattedTimestamp = newTimestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return formattedTimestamp;
+  }
   
 
 </script>
@@ -205,8 +218,8 @@
     {#if filteredTranscript.length}
       {#each filteredTranscript as segment}
         <div class="timestamps">
-          <p>Start: {segment.start}</p>
-          <p>End: {segment.end}</p>
+          <p>Start: {timestampFromSeconds(segment.start)}</p>
+          <p>End: {timestampFromSeconds(segment.end)}</p>
         </div>
         <p>
           {@html highlightMatchingWords(segment.text)}
