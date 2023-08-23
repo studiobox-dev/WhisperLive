@@ -1,5 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, afterUpdate } from 'svelte';
 	import { v4 } from 'uuid';
 	import { env } from '$env/dynamic/public';
 
@@ -8,7 +8,21 @@
 	let transcript;
   let stream;
   let audioDataCache = [];
-	/**
+  let searchQuery = '';
+  let recording = false;
+  let transcriptDiv;
+
+  const scrollToBottom = async (node) => {
+		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
+	};
+
+	afterUpdate(() => {
+		scrollToBottom(transcriptDiv);
+	});
+
+  $: filteredTranscript = transcript ? transcript.segments.filter(segment => segment.text.toLowerCase().includes(searchQuery.toLowerCase())): [];
+	
+  /**
 	 * Resamples the audio data to a target sample rate of 16kHz.
 	 * @param {Array|ArrayBuffer|TypedArray} audioData - The input audio data.
 	 * @param {number} [origSampleRate=44100] - The original sample rate of the audio data.
@@ -44,6 +58,7 @@
 
 	async function startRecording() {
     transcript = null;
+    recording = true;
 		stream = await navigator.mediaDevices.getUserMedia({ audio: true }); // audio stream
 
 		uid = v4(); // generate a unique id for this recording
@@ -115,12 +130,14 @@
   function stopRecording() {
     if (stream) {
       // Stop the audio stream tracks
+      recording = false;
       const tracks = stream.getTracks();
       tracks.forEach(track => track.stop());
 
       // Close the WebSocket connection if it's open
-      if (socket && socket.readyState === WebSocket.OPEN) {
+      if (socket) {
         socket.close();
+        socket = null;
       }
 
       // Clear any audio data cache or other cleanup actions
@@ -129,30 +146,116 @@
     }
   }
 
-	onMount(() => {
-		audioElement = document.querySelector('audio');
-	});
+  function recordingButtonClicked() {
+    if (recording) {
+      stopRecording();
+    }
+    else {
+      startRecording();
+    }
+  }
+
+  function highlightMatchingWords(text) {
+    const query = searchQuery.toLowerCase();
+    const highlightedText = text.replace(new RegExp(query, 'gi'), `<span class="highlight">${query}</span>`);
+    return highlightedText;
+  }
+
+  function downloadTranscript() {
+    if (!transcript) return;
+
+    const transcriptText = transcript.segments
+      .map(segment => `${segment.start} - ${segment.end}: ${segment.text}`)
+      .join('\n');
+
+    const blob = new Blob([transcriptText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'transcript.txt';
+    a.click();
+
+    // Clean up by revoking the object URL
+    URL.revokeObjectURL(url);
+  }
+  
 
 </script>
 
 <div>
-	<button on:click={startRecording}>Start</button>
-	<button on:click={stopRecording}>Stop</button>
-	<!-- <audio controls /> -->
-	<div class="transcript">
-		{#if transcript}
-			{#each transcript.segments as segment}
-				<div class="timestamps">
-					<p>Start: {segment.start}</p>
-					<p>End: {segment.end}</p>
-				</div>
-				<p>{segment.text}</p>
-			{/each}
-		{/if}
-	</div>
+  <div class="nav">
+    <button on:click={recordingButtonClicked} class:recording >{recording ? 'Stop transcribing' : 'Start transcribing'}</button>
+    <div style="display: flex">
+      {#if socket}
+        <p style="color: green;">Connected</p>
+      {:else}
+        <p style="color: red;">Not connected</p>
+      {/if}
+    </div>
+    {#if transcript}
+    <div class="download-button">
+      <button on:click={downloadTranscript}>Download</button>
+    </div>
+    {/if}
+  </div>
+
+  <input type="text" bind:value={searchQuery} placeholder="Search transcript" />
+  <div class="transcript" bind:this={transcriptDiv}>
+    {#if filteredTranscript.length}
+      {#each filteredTranscript as segment}
+        <div class="timestamps">
+          <p>Start: {segment.start}</p>
+          <p>End: {segment.end}</p>
+        </div>
+        <p>
+          {@html highlightMatchingWords(segment.text)}
+        </p>
+      {/each}
+    {:else}
+      <p>No matching results</p>
+    {/if}
+  </div>
+
 </div>
 
 <style>
+  div.nav{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 16px;
+    background-color: #282828;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  /* button:hover {
+    background-color: #404040;
+    transition: background-color 0.4s ease-in-out;
+  } */
+  .recording{
+    background-color: #fff;
+    color: #ff0000;
+    border: 1px solid #ff0000;
+  }
+
+  input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
 	.timestamps {
 		display: flex;
 		flex-direction: row;
@@ -161,5 +264,14 @@
 
 	.transcript {
 		margin-top: 20px;
+    flex: 1;
+    overflow: auto;
 	}
+
+  :global(.highlight) {
+		background-color: rgb(31, 31, 31);
+    color: white;
+		font-weight: bold;
+	}
+
 </style>
