@@ -97,8 +97,15 @@
 					socket.close();
 					return;
 				}
-				// console.log('Transcript: ', typeof event.data)
-				transcript = JSON.parse(event.data);
+
+        transcript = JSON.parse(event.data);
+        transcript.segements = transcript.segments.map(segment => {
+          segment.duration = (segment.end - segment.start).toFixed(2);
+          segment.start = timestampFromSeconds(segment.start);
+          segment.end = timestampFromSeconds(segment.end);
+          return segment;
+        });
+
 			};
 
 			const context = new AudioContext();
@@ -163,11 +170,12 @@
     return highlightedText;
   }
 
+
   function downloadTranscript() {
     if (!transcript) return;
 
     const transcriptText = transcript.segments
-      .map(segment => `${segment.start} - ${segment.end}: ${segment.text}`)
+      .map((segment, i) => `${i} \n${segment.start} --> ${segment.end} \n${segment.text}`)
       .join('\n');
 
     const blob = new Blob([transcriptText], { type: 'text/plain' });
@@ -218,8 +226,9 @@
     {#if filteredTranscript.length}
       {#each filteredTranscript as segment}
         <div class="timestamps">
-          <p>Start: {timestampFromSeconds(segment.start)}</p>
-          <p>End: {timestampFromSeconds(segment.end)}</p>
+          <p>Start: {segment.start}</p>
+          <p>Duration: {segment.duration}s</p>
+          <p>End: {segment.end}</p>
         </div>
         <p>
           {@html highlightMatchingWords(segment.text)}

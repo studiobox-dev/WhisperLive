@@ -1,38 +1,36 @@
-# create-svelte
+# Svelte frontend for WhisperLive
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+This is a svelte frontend for the realtime implementation of whisper by collabora.
 
-## Creating a project
+https://github.com/collabora/WhisperLive
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Demo
+
+![Demo](demo.gif)
+
+## Usage
+
+1. Clone the repo
 
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+git clone git@github.com:yehiaabdelm/transcription-app.git
 ```
 
-## Developing
+2. Install dependencies
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+```bash
+cd transcription-app
+npm i
+```
+
+3. Create a .env and add the websocket url. Follow the collabora/WhisperLive repo to dockerize and deploy the transcription server.
+
+```bash
+PUBLIC_WEBSOCKET_URL="wss://9090.example.com/"
+```
+
+4. Run the app
 
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
