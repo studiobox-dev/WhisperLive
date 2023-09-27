@@ -44,7 +44,7 @@ class TranscriptionServer:
         self.websockets = {}
         self.clients_start_time = {}
         self.max_clients = 4
-        self.max_connection_time = 600  # in seconds
+        self.max_connection_time = 12000  # in seconds
 
     def get_wait_time(self):
         wait_time = None
@@ -176,7 +176,7 @@ class ServeClient:
         # add a blank to segment list as a pause(no speech) for 3 seconds
         self.add_pause_thresh = 3
         self.transcript = []
-        self.send_last_n_segments = 10
+        self.send_last_n_segments = 1000000
 
         # text formatting
         self.wrapper = textwrap.TextWrapper(width=50)
