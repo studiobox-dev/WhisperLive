@@ -156,7 +156,7 @@ class ServeClient:
         self.task = task
         device = "cuda" if torch.cuda.is_available() else "cpu"
         self.transcriber = WhisperModel(
-            "large-v2" if multilingual else "medium.en",
+            "medium" if multilingual else "medium.en",
             device=device,
             compute_type="int8" if device == "cpu" else "float16",
             local_files_only=False,
@@ -176,7 +176,7 @@ class ServeClient:
         # add a blank to segment list as a pause(no speech) for 3 seconds
         self.add_pause_thresh = 3
         self.transcript = []
-        self.send_last_n_segments = 1000000
+        self.send_last_n_segments = 10000
 
         # text formatting
         self.wrapper = textwrap.TextWrapper(width=50)
