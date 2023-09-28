@@ -42,7 +42,7 @@ class TranscriptionServer:
         self.websockets = {}
         self.clients_start_time = {}
         self.max_clients = 4
-        self.max_connection_time = 600
+        self.max_connection_time = 1200
 
     def get_wait_time(self):
         """
