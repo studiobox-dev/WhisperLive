@@ -9,7 +9,7 @@ from dotenv import load_dotenv, find_dotenv
 import os
 
 load_dotenv(find_dotenv())
-HUGGINGFACE_ACCESS_TOKEN = os.environ["HF_ACCESS_TOKEN"]
+HUGGINGFACE_ACCESS_TOKEN = os.environ["HUGGINGFACE_ACCESS_TOKEN"]
 
 
 class Diarization():
