@@ -7,3 +7,4 @@ websockets
 onnxruntime==1.15.1
 pyannote.audio
 networkx
+python-dotenv
