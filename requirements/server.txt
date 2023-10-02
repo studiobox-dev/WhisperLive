@@ -6,3 +6,4 @@ torchaudio==0.10.1
 websockets
 onnxruntime==1.15.1
 pyannote.audio
+networkx

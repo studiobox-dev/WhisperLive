@@ -109,11 +109,13 @@ class TranscriptionServer:
                 except Exception as e:
                     logging.error(e)
                     return
+
                 self.clients[websocket].add_frames(frame_np)
 
                 # diarization
                 try:
-                    diarization = self.diarization_model.process(waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
+                    diarization = self.diarization_model.process(
+                        waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
                     print(diarization)
                 except Exception as e:
                     logging.error(e)
