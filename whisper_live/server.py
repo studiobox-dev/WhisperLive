@@ -22,6 +22,8 @@ import numpy as np
 import time
 from whisper_live.transcriber import WhisperModel
 
+from .diarization import Diarization
+
 
 class TranscriptionServer:
     """
@@ -39,6 +41,7 @@ class TranscriptionServer:
                                            force_reload=True,
                                            onnx=True
                                            )
+        self.diarization_model = Diarization()
         self.vad_threshold = 0.4
         self.clients = {}
         self.websockets = {}
@@ -107,6 +110,14 @@ class TranscriptionServer:
                     logging.error(e)
                     return
                 self.clients[websocket].add_frames(frame_np)
+
+                # diarization
+                try:
+                    diarization = self.diarization_model.process(waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
+                    print(diarization)
+                except Exception as e:
+                    logging.error(e)
+                    return
 
                 elapsed_time = time.time() - self.clients_start_time[websocket]
                 if elapsed_time >= self.max_connection_time:
