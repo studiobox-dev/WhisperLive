@@ -21,5 +21,4 @@ class Diarization():
     def process(self, waveform, sample_rate):
         diarization = self.pipeling(
             {"waveform": waveform, "sample_rate": sample_rate})
-        print(diarization)
         return diarization
