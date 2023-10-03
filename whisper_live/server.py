@@ -137,7 +137,9 @@ class TranscriptionServer:
                 try:
                     diarization = self.diarization_model.process(
                         waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
-                    print("Diarization result: ", diarization)
+                    print('Diarization: ', diarization)
+                    print('Diarization dir: ', dir(diarization))
+                    print('Diarization type: ', type(diarization))
                 except Exception as e:
                     logging.error(e)
                     return

@@ -4,7 +4,7 @@ faster-whisper==0.6.0
 torch
 torchaudio
 websockets
-pyannote.audio
 onnxruntime==1.16.0
+pyannote.audio
 networkx
 python-dotenv
