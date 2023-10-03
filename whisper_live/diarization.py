@@ -19,6 +19,11 @@ class Diarization():
             use_auth_token=HUGGINGFACE_ACCESS_TOKEN)
 
     def process(self, waveform, sample_rate):
+        print('Waveform shape: ', waveform.shape)
+        print('Waveform: ', waveform)
+        audio_tensor = torch.tensor(waveform, dtype=torch.float32).unsqueeze(0)
+        print('Audio tensor shape: ', audio_tensor.shape)
+        print('Audio tensor: ', audio_tensor)
         diarization = self.pipeline(
-            {"waveform": waveform, "sample_rate": sample_rate})
+            {"waveform": audio_tensor, "sample_rate": sample_rate})
         return diarization
