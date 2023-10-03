@@ -38,7 +38,7 @@ class TranscriptionServer:
     def __init__(self):
         # voice activity detection model
         self.vad_model = VoiceActivityDetection()
-        self.diarization_model = Diarization()
+        self.diarization = Diarization()
         self.vad_threshold = 0.4
 
         self.clients = {}
@@ -135,11 +135,11 @@ class TranscriptionServer:
 
                 # diarization
                 try:
-                    diarization = self.diarization_model.process(
+                    diarization = self.diarization.process(
                         waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
-                    print('Diarization: ', diarization)
-                    print('Diarization dir: ', dir(diarization))
-                    print('Diarization type: ', type(diarization))
+                    self.clients[websocket].transcript = self.diarization.join_transcript_with_diarization(
+                        self.clients[websocket].transcript, diarization)
+
                 except Exception as e:
                     logging.error(e)
                     return
@@ -255,6 +255,8 @@ class ServeClient:
         self.add_pause_thresh = 3
         self.transcript = []
         self.send_last_n_segments = 10000
+
+        self.diarized_segments = []
 
         # text formatting
         self.wrapper = textwrap.TextWrapper(width=50)

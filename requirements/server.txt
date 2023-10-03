@@ -8,3 +8,4 @@ pyannote.audio
 onnxruntime==1.16.0
 networkx
 python-dotenv
+intervaltree
