@@ -122,6 +122,8 @@ class TranscriptionServer:
                 try:
                     speech_prob = self.vad_model(
                         torch.from_numpy(frame_np.copy()), self.RATE).item()
+                    print('Speech prob: ', speech_prob)
+                    print('Using VAD')
                     if speech_prob < self.vad_threshold:
                         continue
 
