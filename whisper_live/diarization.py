@@ -2,7 +2,7 @@
 # to make the current decision
 from pyannote.audio import Pipeline
 import torch
-from intervaltree import Interval, IntervalTree
+from intervaltree import IntervalTree
 
 
 from dotenv import load_dotenv, find_dotenv
@@ -17,9 +17,9 @@ class Diarization():
         self.pipeline = Pipeline.from_pretrained(
             "pyannote/speaker-diarization-3.0",
             use_auth_token=HUGGINGFACE_ACCESS_TOKEN)
-        if torch.cuda.is_available():
-            # if we GPU available, use it
-            self.pipeline.to(torch.device("cuda"))
+        # if torch.cuda.is_available():
+        #     # if we GPU available, use it
+        #     self.pipeline.to(torch.device("cuda"))
 
     def transform_diarization_output(self, diarization):
         l = []
@@ -39,12 +39,12 @@ class Diarization():
         return diarization
 
     def join_transcript_with_diarization(self, transcript, diarization):
-        
+
         diarization_tree = IntervalTree()
         # Add diarization to interval tree
         for dia in diarization:
             diarization_tree.addi(dia['start'], dia['end'], dia['speaker'])
-        
+
         joined = []
         for seg in transcript:
             interval_start = seg['start']
@@ -59,5 +59,5 @@ class Diarization():
                 'speakers': speakers,
                 'text': seg['text']
             })
-        
+
         return joined
