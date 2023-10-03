@@ -19,6 +19,6 @@ class Diarization():
             use_auth_token=HUGGINGFACE_ACCESS_TOKEN)
 
     def process(self, waveform, sample_rate):
-        diarization = self.pipeling(
+        diarization = self.pipeline(
             {"waveform": waveform, "sample_rate": sample_rate})
         return diarization

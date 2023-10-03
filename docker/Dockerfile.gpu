@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     git \
     bzip2 \
     libx11-6 \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 RUN apt update
 
@@ -24,7 +24,7 @@ RUN apt install software-properties-common -y && \
 
 RUN apt install python3-dev -y && \
     apt install python-is-python3
-    
+
 
 # install pip
 RUN apt install python3-pip -y
