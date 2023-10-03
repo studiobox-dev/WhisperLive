@@ -2,9 +2,8 @@
 # to make the current decision
 from pyannote.audio import Pipeline
 import torch
-# from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
-# from pyannote.audio import Audio
-# from pyannote.core import Segment
+
+
 from dotenv import load_dotenv, find_dotenv
 import os
 
