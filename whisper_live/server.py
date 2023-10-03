@@ -38,7 +38,7 @@ class TranscriptionServer:
     def __init__(self):
         # voice activity detection model
         self.vad_model = VoiceActivityDetection()
-        # self.diarization_model = Diarization()
+        self.diarization_model = Diarization()
         self.vad_threshold = 0.4
 
         self.clients = {}
