@@ -134,13 +134,13 @@ class TranscriptionServer:
                 self.clients[websocket].add_frames(frame_np)
 
                 # diarization
-                # try:
-                #     diarization = self.diarization_model.process(
-                #         waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
-                #     print(diarization)
-                # except Exception as e:
-                #     logging.error(e)
-                #     return
+                try:
+                    diarization = self.diarization_model.process(
+                        waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
+                    print("Diarization result: ",diarization)
+                except Exception as e:
+                    logging.error(e)
+                    return
 
                 elapsed_time = time.time() - self.clients_start_time[websocket]
                 if elapsed_time >= self.max_connection_time:
