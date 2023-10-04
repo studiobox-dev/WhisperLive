@@ -51,12 +51,12 @@ class Diarization():
             interval_end = seg['end']
             # Get overlapping diarization
             overlaps = diarization_tree[interval_start:interval_end]
-            speakers = [overlap.data for overlap in overlaps]
+            speakers = {overlap.data for overlap in overlaps}
             # Add to result
             joined.append({
                 'start': interval_start,
                 'end': interval_end,
-                'speakers': speakers,
+                'speakers': list(speakers),
                 'text': seg['text']
             })
 
