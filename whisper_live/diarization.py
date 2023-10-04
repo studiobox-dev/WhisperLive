@@ -14,12 +14,10 @@ HUGGINGFACE_ACCESS_TOKEN = os.environ["HUGGINGFACE_ACCESS_TOKEN"]
 
 class Diarization():
     def __init__(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pipeline = Pipeline.from_pretrained(
             "pyannote/speaker-diarization-3.0",
-            use_auth_token=HUGGINGFACE_ACCESS_TOKEN)
-        # if torch.cuda.is_available():
-        #     # if we GPU available, use it
-        #     self.pipeline.to(torch.device("cuda"))
+            use_auth_token=HUGGINGFACE_ACCESS_TOKEN).to(device)
 
     def transform_diarization_output(self, diarization):
         l = []
