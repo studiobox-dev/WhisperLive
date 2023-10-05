@@ -1,3 +1,4 @@
 whisper_live/.env
 whisper_live/.env.*
 ecs-task.json
+testing.py
