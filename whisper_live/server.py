@@ -38,7 +38,7 @@ class TranscriptionServer:
     def __init__(self):
         # voice activity detection model
         self.vad_model = VoiceActivityDetection()
-        # self.diarization = Diarization()
+        self.diarization = Diarization()
         self.vad_threshold = 0.4
 
         self.clients = {}
@@ -134,15 +134,15 @@ class TranscriptionServer:
                 self.clients[websocket].add_frames(frame_np)
 
                 # diarization
-                # try:
-                #     diarization = self.diarization.process(
-                #         waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
-                #     self.clients[websocket].transcript = self.diarization.join_transcript_with_diarization(
-                #         self.clients[websocket].transcript, diarization)
+                try:
+                    diarization = self.diarization.process(
+                        waveform=self.clients[websocket].frames_np, sample_rate=self.RATE)
+                    self.clients[websocket].transcript = self.diarization.join_transcript_with_diarization(
+                        self.clients[websocket].transcript, diarization)
 
-                # except Exception as e:
-                #     logging.error(e)
-                #     return
+                except Exception as e:
+                    logging.error(e)
+                    return
 
                 elapsed_time = time.time() - self.clients_start_time[websocket]
                 if elapsed_time >= self.max_connection_time:
