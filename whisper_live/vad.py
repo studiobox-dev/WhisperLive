@@ -18,10 +18,11 @@ class VoiceActivityDetection():
         opts.intra_op_num_threads = 1
 
         if force_onnx_cpu and 'CPUExecutionProvider' in onnxruntime.get_available_providers():
-            self.session = onnxruntime.InferenceSession(path, providers=['CPUExecutionProvider'], sess_options=opts)
+            self.session = onnxruntime.InferenceSession(
+                path, providers=['CPUExecutionProvider'], sess_options=opts)
         else:
-            self.session = onnxruntime.InferenceSession(path, providers=['CUDAExecutionProvider'], sess_options=opts)
-
+            self.session = onnxruntime.InferenceSession(
+                path, providers=['CUDAExecutionProvider'], sess_options=opts)
 
         self.reset_states()
         self.sample_rates = [8000, 16000]
@@ -30,15 +31,17 @@ class VoiceActivityDetection():
         if x.dim() == 1:
             x = x.unsqueeze(0)
         if x.dim() > 2:
-            raise ValueError(f"Too many dimensions for input audio chunk {x.dim()}")
+            raise ValueError(
+                f"Too many dimensions for input audio chunk {x.dim()}")
 
         if sr != 16000 and (sr % 16000 == 0):
             step = sr // 16000
-            x = x[:,::step]
+            x = x[:, ::step]
             sr = 16000
 
         if sr not in self.sample_rates:
-            raise ValueError(f"Supported sampling rates: {self.sample_rates} (or multiply of 16000)")
+            raise ValueError(
+                f"Supported sampling rates: {self.sample_rates} (or multiply of 16000)")
 
         if sr / x.shape[1] > 31.25:
             raise ValueError("Input audio chunk is too short")
@@ -64,7 +67,8 @@ class VoiceActivityDetection():
             self.reset_states(batch_size)
 
         if sr in [8000, 16000]:
-            ort_inputs = {'input': x.numpy(), 'h': self._h, 'c': self._c, 'sr': np.array(sr, dtype='int64')}
+            ort_inputs = {'input': x.numpy(), 'h': self._h,
+                          'c': self._c, 'sr': np.array(sr, dtype='int64')}
             ort_outs = self.session.run(None, ort_inputs)
             out, self._h, self._c = ort_outs
         else:
@@ -108,8 +112,8 @@ class VoiceActivityDetection():
             # If it doesn't exist, download the model using wget
             print("Downloading VAD ONNX model...")
             try:
-                subprocess.run(["wget", "-O", model_filename, model_url], check=True)
+                subprocess.run(
+                    ["wget", "-O", model_filename, model_url], check=True)
             except subprocess.CalledProcessError:
                 print("Failed to download the model using wget.")
         return model_filename
-
