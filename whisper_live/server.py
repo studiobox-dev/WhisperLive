@@ -41,8 +41,13 @@ class TranscriptionServer:
         self.clients = {}
         self.websockets = {}
         self.clients_start_time = {}
-        self.max_clients = 10
-        self.max_connection_time = 1200
+        self.max_clients = 6
+        self.max_connection_time = 18000
+
+        logging.info("Transcription Server Initialized with the following parameters:")
+        logging.info(f"Max Clients: {self.max_clients}")
+        logging.info(f"Max Connection Time: {self.max_connection_time} seconds")
+
 
     def get_wait_time(self):
         """
@@ -217,13 +222,15 @@ class ServeClient:
         self.language = language if multilingual else "en"
         self.task = task
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        model = "medium" if multilingual else "medium.en"
         self.transcriber = WhisperModel(
-            "large" if multilingual else "medium.en",
+            model,
             device=device,
             compute_type="int8" if device == "cpu" else "float16",
             local_files_only=False,
         )
-
+        logging.info(f"Transcriber initialized with device: {device}")
+        logging.info(f"Transcriber initialized with model: {model}")
         self.timestamp_offset = 0.0
         self.frames_np = None
         self.frames_offset = 0.0
