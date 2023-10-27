@@ -378,11 +378,13 @@ class ServeClient:
             try:
                 input_sample = input_bytes.copy()
                 # set previous complete segment as initial prompt
-                if len(self.text) and self.text[-1] != '':
-                    initial_prompt = self.text[-1]
-                else:
-                    initial_prompt = None
+                # if len(self.text) and self.text[-1] != '':
+                #     initial_prompt = self.text[-1]
+                # else:
+                #     initial_prompt = None
 
+                initial_prompt = None
+                
                 # whisper transcribe with prompt
                 result = self.transcriber.transcribe(
                     input_sample,
