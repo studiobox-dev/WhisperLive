@@ -393,6 +393,11 @@ class ServeClient:
 
                 if len(result):
                     self.t_start = None
+
+                    # if the length of the second to last segment is close to the one before it then combine it
+                    if len(self.transcript) > 3:
+                        self.transcript = self.format_transcript()
+
                     last_segment = self.update_segments(result, duration)
                     if len(self.transcript) < self.send_last_n_segments:
                         segments = self.transcript
@@ -400,6 +405,7 @@ class ServeClient:
                         segments = self.transcript[-self.send_last_n_segments:]
                     if last_segment is not None:
                         segments = segments + [last_segment]
+
 
                     try:
                         self.websocket.send(
@@ -516,6 +522,15 @@ class ServeClient:
             self.timestamp_offset += offset
 
         return last_segment
+    
+    def format_transcript(self):
+        segments = self.transcript
+        if abs(segments[-3]['end'] - segments[-2]['start']) < 1:
+            segments[-3]['text'] = ' ' + segments[-2]['text']
+            segments[-3]['end'] = segments[-2]['end']
+            segments.pop(-2)
+        return segments
+
 
     def disconnect(self):
         """
