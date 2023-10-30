@@ -401,6 +401,9 @@ class ServeClient:
                     if last_segment is not None:
                         segments = segments + [last_segment]
 
+                    # format segments
+                    segments = self.format_segments(segments)
+
                     try:
                         self.websocket.send(
                             json.dumps({
@@ -425,6 +428,9 @@ class ServeClient:
                     if len(self.text) and self.text[-1] != '':
                         if time.time() - self.t_start > self.add_pause_thresh:
                             self.text.append('')
+
+                    # format segments
+                    segments = self.format_segments(segments)
 
                     try:
                         self.websocket.send(
@@ -516,6 +522,27 @@ class ServeClient:
             self.timestamp_offset += offset
 
         return last_segment
+    
+
+    def format_segments(self, segments):
+        length = len(segments)
+        new_segments = []
+        if length > 3:
+            current_segment = segments[0]
+            for next_segment in segments[1:-1]:
+                if abs(current_segment['end'] - next_segment['start']) < 1:
+                    current_segment['text'] = ' ' + next_segment['text']
+                    current_segment['end'] = next_segment['end']
+                else:
+                    new_segments.append(current_segment)
+                    current_segment = next_segment
+            new_segments.append(current_segment)
+            new_segments.append(segments[-1])
+        else:
+            new_segments = segments
+        return new_segments
+
+                    
 
     def disconnect(self):
         """
