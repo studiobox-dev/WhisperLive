@@ -525,6 +525,22 @@ class ServeClient:
     
 
     def format_segments(self, segments):
+        """
+        Format a given list of speech transcript segments, merging segments that 
+        are close to each other into single segments.
+
+        Segments are close if the end of the preceding segment and the 
+        start of the following segment are within 1 unit. The last 
+        segment is not merged and always kept separate.
+
+        Args:
+            segments (list): A list of dictionaries, where each dictionary 
+                            represents a speech segment with keys 'start', 
+                            'end', and 'text'.
+
+        Returns:
+            new_segments (list): The formatted list of segments.
+        """
         length = len(segments)
         new_segments = []
         if length > 3:
