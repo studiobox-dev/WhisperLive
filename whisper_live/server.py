@@ -471,11 +471,13 @@ class ServeClient:
         if len(segments) > 1:
             for i, s in enumerate(segments[:-1]):
                 text_ = s.text
+                print('SEGMENT OBJECT: ', s)
+                print('SEGMENT OBJECT TYPE: ',type(s))
                 self.text.append(text_)
                 self.transcript.append(
                     {
-                        'start': self.get_seconds(duration, s['start']),
-                        'end': self.get_seconds(duration, s['end']),
+                        'start': self.get_seconds(duration, s.start),
+                        'end': self.get_seconds(duration, s.end),
                         'text': text_
                     }
                 )
@@ -484,8 +486,8 @@ class ServeClient:
 
         self.current_out += segments[-1].text
         last_segment = {
-            'start': self.get_seconds(duration, segments[-1]['start']),
-            'end': self.get_seconds(duration, segments[-1]['end']),
+            'start': self.get_seconds(duration, segments[-1].start),
+            'end': self.get_seconds(duration, segments[-1].end),
             'text': self.current_out
         }
 
