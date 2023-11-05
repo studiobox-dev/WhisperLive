@@ -386,6 +386,7 @@ class ServeClient:
                     initial_prompt = None
 
                 # whisper transcribe with prompt
+                self.current_time = datetime.now()
                 result = self.transcriber.transcribe(
                     input_sample,
                     initial_prompt=initial_prompt,
@@ -395,7 +396,6 @@ class ServeClient:
 
                 if len(result):
                     self.t_start = None
-                    self.current_time = datetime.now()
                     last_segment = self.update_segments(result, duration)
                     if len(self.transcript) < self.send_last_n_segments:
                         segments = self.transcript
