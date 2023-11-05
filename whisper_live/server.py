@@ -3,7 +3,7 @@ import time
 import threading
 import json
 import textwrap
-
+from datetime import datetime
 import logging
 # logging.basicConfig(level = logging.INFO)
 
@@ -223,7 +223,7 @@ class ServeClient:
         self.language = language if multilingual else "en"
         self.task = task
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        model = "large-v2" if multilingual else "medium.en"
+        model = "small" if multilingual else "medium.en"
         self.transcriber = WhisperModel(
             model,
             device=device,
@@ -233,6 +233,8 @@ class ServeClient:
         logging.info(f"Transcriber initialized with device: {device}")
         logging.info(f"Transcriber initialized with model: {model}")
         self.timestamp_offset = 0.0
+        self.start_time = datetime.now()
+        self.current_time = datetime.now()
         self.frames_np = None
         self.frames_offset = 0.0
         self.text = []
@@ -393,6 +395,7 @@ class ServeClient:
 
                 if len(result):
                     self.t_start = None
+                    self.current_time = datetime.now()
                     last_segment = self.update_segments(result, duration)
                     if len(self.transcript) < self.send_last_n_segments:
                         segments = self.transcript
@@ -463,17 +466,16 @@ class ServeClient:
         offset = None
         self.current_out = ''
         last_segment = None
+
         # process complete segments
         if len(segments) > 1:
             for i, s in enumerate(segments[:-1]):
                 text_ = s.text
                 self.text.append(text_)
-                start, end = self.timestamp_offset + \
-                    s.start, self.timestamp_offset + min(duration, s.end)
                 self.transcript.append(
                     {
-                        'start': start,
-                        'end': end,
+                        'start': self.get_seconds(duration, s['start']),
+                        'end': self.get_seconds(duration, s['end']),
                         'text': text_
                     }
                 )
@@ -482,8 +484,8 @@ class ServeClient:
 
         self.current_out += segments[-1].text
         last_segment = {
-            'start': self.timestamp_offset + segments[-1].start,
-            'end': self.timestamp_offset + min(duration, segments[-1].end),
+            'start': self.get_seconds(duration, segments[-1]['start']),
+            'end': self.get_seconds(duration, segments[-1]['end']),
             'text': self.current_out
         }
 
@@ -516,6 +518,27 @@ class ServeClient:
             self.timestamp_offset += offset
 
         return last_segment
+    
+    def get_seconds(self, duration, increment):
+        """
+        Calculate the number of seconds for a given duration and increment.
+
+        This method calculates the number of seconds for a given duration and increment, taking into account
+        the current time and start time. It returns the number of seconds as a float.
+
+        Let's say the current_time is 10:02 AM and the start_time is 10:00 AM. The duration is 10 seconds, and
+        the increment (start time) is 5 seconds. So this method will return 120 - 10 + 5 = 115 seconds. This is
+        the start time of the segment in seconds. Similarly, for the end time if the increment is 10 seconds,
+        the method will return 120 - 10 + 10 = 120 seconds. So the segment will be from 115 seconds to 120 seconds.
+
+        Args:
+            duration (float): The duration/length of the audio array in seconds.
+            increment (float): The increment in seconds.
+
+        Returns:
+            float: The number of seconds.
+        """
+        return (self.current_time - self.start_time).total_seconds() - duration + increment
 
     def disconnect(self):
         """
