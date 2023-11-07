@@ -36,7 +36,7 @@ class TranscriptionServer:
     def __init__(self):
         # voice activity detection model
         self.vad_model = VoiceActivityDetection()
-        self.vad_threshold = 0.38
+        self.vad_threshold = 0.4
 
         self.clients = {}
         self.websockets = {}
@@ -223,7 +223,7 @@ class ServeClient:
         self.language = language if multilingual else "en"
         self.task = task
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        model = "large-v2" if multilingual else "medium.en"
+        model = "medium" if multilingual else "medium.en"
         self.transcriber = WhisperModel(
             model,
             device=device,
